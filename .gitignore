@@ -4,3 +4,19 @@
 *.ptx
 *.cubin
 *.fatbin
+# Keep generated and vendor binaries locally; publish EXEs as Release assets.
+*.exe
+*.dll
+*.zip
+*.gguf
+*.safetensors
+runtime/
+release/
+__pycache__/
+*.pyc
+*.log
+.env
+.env.*
+.venv/
+build/
+dist/
