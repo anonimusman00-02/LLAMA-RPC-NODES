@@ -968,6 +968,18 @@ def build_server_command(
     return command
 
 
+def format_cline_endpoint(api_host, api_port, model_id, guard_active):
+    if guard_active:
+        return (
+            f"Cline aman (DISARANKAN): http://127.0.0.1:{api_port + 1}/v1 "
+            f"| Model ID: {model_id}"
+        )
+    return (
+        f"Cline tanpa pengaman: http://{api_host}:{api_port}/v1 "
+        f"| Model ID: {model_id}"
+    )
+
+
 def launch_llama_server(argv=None):
     parser = argparse.ArgumentParser(description="Llama server dengan node RPC")
     parser.add_argument(
@@ -1176,8 +1188,6 @@ def launch_llama_server(argv=None):
     print("Parameter dari aplikasi klien tetap dapat menimpa default sampling.")
     print(f"Node  : {rpc_servers or '(tanpa NODE)'}")
     print(f"API   : http://{args.api_host}:{args.api_port}")
-    print(f"Cline langsung: http://{args.api_host}:{args.api_port}/v1 | Model ID: {model_id}")
-    print("Tekan Ctrl+C untuk menghentikan server.\n")
 
     model_loaded = threading.Event()
     stop_monitor = threading.Event()
@@ -1211,15 +1221,17 @@ def launch_llama_server(argv=None):
                 )
             except OSError as exc:
                 print(f"Peringatan: endpoint Cline aman tidak aktif: {exc}")
+                print(format_cline_endpoint(args.api_host, args.api_port, model_id, False))
             else:
-                print(
-                    f"Cline aman: http://127.0.0.1:{args.api_port + 1}/v1 "
-                    f"| Model ID: {model_id}"
-                )
+                print(format_cline_endpoint(args.api_host, args.api_port, model_id, True))
                 print(
                     "Arahkan Cline ke alamat aman tersebut untuk menghapus "
                     "label nomor baris dari konteks baca."
                 )
+        else:
+            print("Pengaman Cline dinonaktifkan oleh --no-cline-guard.")
+            print(format_cline_endpoint(args.api_host, args.api_port, model_id, False))
+        print("Tekan Ctrl+C untuk menghentikan server.\n")
         progress_thread = threading.Thread(
             target=monitor_model_progress,
             args=(

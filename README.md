@@ -55,6 +55,8 @@ Repositori menyediakan `server-nodes.example.json`. Konfigurasi nyata di `releas
 
 Di Cline, pilih **OpenAI Compatible**, isi Base URL `http://127.0.0.1:1235/v1`, dan salin **Model ID** dari tampilan SERVER. Jika formulir mewajibkan API key, isi nilai dummy seperti `local`. Samakan context window Cline dengan konteks efektif di SERVER. Tools, MCP, rules, dan skills tetap dijalankan Cline; SERVER hanya menyajikan respons dan `tool_calls` model. Endpoint aman ini hanya tersedia di PC utama dan dapat dimatikan dengan `--no-cline-guard`. Ia mengurangi risiko model menyalin label seperti `92 |` dari hasil baca file; ia tidak memvalidasi atau memperbaiki patch hasil model, jadi tetap periksa diff sebelum menerima edit.
 
+Saat SERVER dimulai, gunakan baris **Cline aman (DISARANKAN)** yang tampil sebelum instruksi Ctrl+C. Jika pengaman gagal aktif atau dinonaktifkan, aplikasi menampilkan **Cline tanpa pengaman** untuk port `1234` disertai peringatan.
+
 | Pengaturan | Default |
 | --- | --- |
 | Konteks interaktif | 2.048 token; dapat diubah saat mulai |
@@ -141,6 +143,8 @@ The repository includes `server-nodes.example.json`. Your real `release/server-n
 ### Cline and defaults
 
 In Cline, select **OpenAI Compatible**, set Base URL to `http://127.0.0.1:1235/v1`, and copy the **Model ID** shown by SERVER. If the UI requires an API key, use a dummy value such as `local`. Match Cline's context window to the effective SERVER context. Cline owns tools, MCP, rules, and skills; SERVER returns model responses and structured `tool_calls`. This localhost-only endpoint can be disabled with `--no-cline-guard`. It reduces the chance of copying display labels such as `92 |` from file-read results; it does not validate or repair generated patches, so review diffs before accepting edits.
+
+At SERVER startup, use the **Cline aman (DISARANKAN)** line shown before the Ctrl+C instruction. If the guard cannot start or is disabled, the app explicitly labels port `1234` as **Cline tanpa pengaman** and shows a warning.
 
 | Setting | Default |
 | --- | --- |
