@@ -17,7 +17,7 @@ _Ilustrasi: router pada gambar bersifat opsional jika IP diatur manual atau DHCP
 - **Backend otomatis:** mencoba CUDA untuk NVIDIA yang kompatibel, lalu Vulkan, kemudian CPU.
 - **Pemilihan model:** masukkan folder model; SERVER mencari `.gguf` di semua subfolder. File model hanya diperlukan pada PC utama.
 - **Pengaturan inferensi:** pilih panjang konteks dan Think/Reasoning (`auto`, `on`, `off`). Menu lanjutan menyediakan sampling, output, memori, dan performa.
-- **API lokal:** `http://127.0.0.1:1234/v1`, dapat digunakan sebagai penyedia *OpenAI Compatible* di Cline.
+- **API lokal:** `http://127.0.0.1:1234/v1` untuk klien biasa. Endpoint khusus Cline di `http://127.0.0.1:1235/v1` membersihkan label nomor baris berurutan dari konteks baca sebelum diteruskan ke model.
 - **`CHECK.exe`:** jalankan hanya pada satu PC pemeriksa untuk melihat node online, VRAM, latensi/jitter RPC, dan GPU PC pemeriksa.
 
 ### Kebutuhan
@@ -29,12 +29,12 @@ _Ilustrasi: router pada gambar bersifat opsional jika IP diatur manual atau DHCP
 
 ### Mulai cepat
 
-1. Setelah pemilik repositori mengunggahnya, unduh `LLAMA-RPC.exe` dari **GitHub Releases**. Salin EXE yang sama ke PC utama dan semua PC pembantu. `CHECK.exe` hanya dibutuhkan pada PC pemeriksa.
+1. Unduh `LLAMA-RPC.exe` dari [GitHub Releases](https://github.com/anonimusman00-02/LLAMA-RPC-NODES/releases/latest). Salin EXE yang sama ke PC utama dan semua PC pembantu. `CHECK.exe` hanya dibutuhkan pada PC pemeriksa.
 2. Pada setiap PC pembantu, jalankan `LLAMA-RPC.exe` dan pilih **2. NODE pembantu**. Jika aturan firewall TCP `50052` belum berhasil dibuat, jalankan sekali sebagai Administrator. Biarkan jendela node terbuka dan catat IP:port yang tampil.
 3. Pada PC utama, jalankan EXE yang sama dan pilih **1. SERVER utama**. Pilih **2. Tambah Node** untuk setiap alamat pembantu; **3. Hapus Node** untuk alamat yang tidak digunakan.
 4. Pilih **1. Mulai**. Masukkan folder model (misalnya `D:\Models`), pilih model GGUF dan perangkat yang digunakan, lalu tentukan konteks dan mode Think. Tekan Enter pada pengaturan lanjutan untuk menerima default.
 5. Tunggu hingga log `model loaded` dan alamat API tampil. Progres `~99%` adalah perkiraan aktivitas disk/RAM; alokasi GPU/RPC masih dapat berlanjut setelah itu.
-6. Arahkan aplikasi klien pada PC utama ke `http://127.0.0.1:1234/v1`.
+6. Arahkan aplikasi klien biasa ke `http://127.0.0.1:1234/v1`, atau Cline ke `http://127.0.0.1:1235/v1`.
 
 Contoh perintah tanpa menu:
 
@@ -53,7 +53,7 @@ Repositori menyediakan `server-nodes.example.json`. Konfigurasi nyata di `releas
 
 ### Cline dan nilai default
 
-Di Cline, pilih **OpenAI Compatible**, isi Base URL `http://127.0.0.1:1234/v1`, dan salin **Model ID** dari tampilan SERVER. Jika formulir mewajibkan API key, isi nilai dummy seperti `local`. Samakan context window Cline dengan konteks efektif di SERVER. Tools, MCP, rules, dan skills tetap dijalankan Cline; SERVER hanya menyajikan respons dan `tool_calls` model.
+Di Cline, pilih **OpenAI Compatible**, isi Base URL `http://127.0.0.1:1235/v1`, dan salin **Model ID** dari tampilan SERVER. Jika formulir mewajibkan API key, isi nilai dummy seperti `local`. Samakan context window Cline dengan konteks efektif di SERVER. Tools, MCP, rules, dan skills tetap dijalankan Cline; SERVER hanya menyajikan respons dan `tool_calls` model. Endpoint aman ini hanya tersedia di PC utama dan dapat dimatikan dengan `--no-cline-guard`. Ia mengurangi risiko model menyalin label seperti `92 |` dari hasil baca file; ia tidak memvalidasi atau memperbaiki patch hasil model, jadi tetap periksa diff sebelum menerima edit.
 
 | Pengaturan | Default |
 | --- | --- |
@@ -104,7 +104,7 @@ _Illustration: the router is optional if IP addresses are configured manually or
 - **Automatic backend:** tries compatible NVIDIA CUDA, then Vulkan, then CPU.
 - **Model discovery:** enter a model directory; SERVER scans subfolders for `.gguf` files. Only the main PC needs the model file.
 - **Inference controls:** select context length and Think/Reasoning (`auto`, `on`, `off`). Optional advanced menus cover sampling, output, memory, and performance.
-- **Local API:** `http://127.0.0.1:1234/v1`, usable with Cline's *OpenAI Compatible* provider.
+- **Local API:** `http://127.0.0.1:1234/v1` for ordinary clients. The dedicated Cline endpoint at `http://127.0.0.1:1235/v1` removes consecutive display-only line labels from read context before forwarding it to the model.
 - **`CHECK.exe`:** run on one checking PC to inspect online nodes, VRAM, RPC latency/jitter, and the checking PC's GPU.
 
 ### Requirements
@@ -116,12 +116,12 @@ _Illustration: the router is optional if IP addresses are configured manually or
 
 ### Quick start
 
-1. Once the repository owner has uploaded it, download `LLAMA-RPC.exe` from **GitHub Releases**. Copy the same EXE to the main PC and every helper PC. Only the checking PC needs `CHECK.exe`.
+1. Download `LLAMA-RPC.exe` from [GitHub Releases](https://github.com/anonimusman00-02/LLAMA-RPC-NODES/releases/latest). Copy the same EXE to the main PC and every helper PC. Only the checking PC needs `CHECK.exe`.
 2. On each helper PC, launch `LLAMA-RPC.exe`, choose **2. NODE pembantu**, and leave its window open. Run it once as Administrator if the TCP `50052` firewall rule could not be created. Note its displayed IP:port.
 3. On the main PC, launch the same EXE and choose **1. SERVER utama**. Choose **2. Tambah Node** for each helper address; use **3. Hapus Node** to remove an address.
 4. Choose **1. Mulai**. Enter a model directory such as `D:\Models`, select a GGUF model and compute devices, then set context and Think mode. Press Enter at the advanced-settings question to keep defaults.
 5. Wait for `model loaded` and the API address. `~99%` estimates disk/RAM activity; GPU/RPC allocation may continue afterward.
-6. Point a client on the main PC to `http://127.0.0.1:1234/v1`.
+6. Point an ordinary client to `http://127.0.0.1:1234/v1`, or Cline to `http://127.0.0.1:1235/v1`.
 
 Command-line example:
 
@@ -140,7 +140,7 @@ The repository includes `server-nodes.example.json`. Your real `release/server-n
 
 ### Cline and defaults
 
-In Cline, select **OpenAI Compatible**, set Base URL to `http://127.0.0.1:1234/v1`, and copy the **Model ID** shown by SERVER. If the UI requires an API key, use a dummy value such as `local`. Match Cline's context window to the effective SERVER context. Cline owns tools, MCP, rules, and skills; SERVER returns model responses and structured `tool_calls`.
+In Cline, select **OpenAI Compatible**, set Base URL to `http://127.0.0.1:1235/v1`, and copy the **Model ID** shown by SERVER. If the UI requires an API key, use a dummy value such as `local`. Match Cline's context window to the effective SERVER context. Cline owns tools, MCP, rules, and skills; SERVER returns model responses and structured `tool_calls`. This localhost-only endpoint can be disabled with `--no-cline-guard`. It reduces the chance of copying display labels such as `92 |` from file-read results; it does not validate or repair generated patches, so review diffs before accepting edits.
 
 | Setting | Default |
 | --- | --- |

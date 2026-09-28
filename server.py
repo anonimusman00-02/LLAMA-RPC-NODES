@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 
 from backend_selector import BACKEND_CHOICES, runtime_dir, select_backend
+from cline_guard import start_cline_guard
 
 
 DEFAULT_NODE_PORT = 50052
@@ -983,6 +984,11 @@ def launch_llama_server(argv=None):
     parser.add_argument("--api-host", default=DEFAULT_API_HOST)
     parser.add_argument("--api-port", type=int, default=DEFAULT_API_PORT)
     parser.add_argument(
+        "--no-cline-guard",
+        action="store_true",
+        help="Nonaktifkan endpoint Cline yang membersihkan label nomor baris.",
+    )
+    parser.add_argument(
         "--ctx-size",
         type=int,
         help=f"Panjang konteks AI dalam token (default interaktif: {DEFAULT_CTX_SIZE})",
@@ -1170,7 +1176,7 @@ def launch_llama_server(argv=None):
     print("Parameter dari aplikasi klien tetap dapat menimpa default sampling.")
     print(f"Node  : {rpc_servers or '(tanpa NODE)'}")
     print(f"API   : http://{args.api_host}:{args.api_port}")
-    print(f"Cline : http://{args.api_host}:{args.api_port}/v1 | Model ID: {model_id}")
+    print(f"Cline langsung: http://{args.api_host}:{args.api_port}/v1 | Model ID: {model_id}")
     print("Tekan Ctrl+C untuk menghentikan server.\n")
 
     model_loaded = threading.Event()
@@ -1181,6 +1187,8 @@ def launch_llama_server(argv=None):
     }
     process = None
     progress_thread = None
+    guard_server = None
+    guard_thread = None
     try:
         process = subprocess.Popen(
             command,
@@ -1192,6 +1200,26 @@ def launch_llama_server(argv=None):
             errors="replace",
             bufsize=1,
         )
+        if not args.no_cline_guard:
+            upstream_host = (
+                "127.0.0.1" if args.api_host in ("0.0.0.0", "::")
+                else args.api_host
+            )
+            try:
+                guard_server, guard_thread = start_cline_guard(
+                    upstream_host, args.api_port, args.api_port + 1
+                )
+            except OSError as exc:
+                print(f"Peringatan: endpoint Cline aman tidak aktif: {exc}")
+            else:
+                print(
+                    f"Cline aman: http://127.0.0.1:{args.api_port + 1}/v1 "
+                    f"| Model ID: {model_id}"
+                )
+                print(
+                    "Arahkan Cline ke alamat aman tersebut untuk menghapus "
+                    "label nomor baris dari konteks baca."
+                )
         progress_thread = threading.Thread(
             target=monitor_model_progress,
             args=(
@@ -1223,6 +1251,11 @@ def launch_llama_server(argv=None):
         stop_monitor.set()
         if progress_thread:
             progress_thread.join(timeout=2)
+        if guard_server:
+            guard_server.shutdown()
+            guard_server.server_close()
+        if guard_thread:
+            guard_thread.join(timeout=2)
 
 
 if __name__ == "__main__":
